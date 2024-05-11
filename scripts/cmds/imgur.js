@@ -1,37 +1,34 @@
 const axios = require('axios');
 
 module.exports = {
-		config: {
-				name: "imgur",
-				version: "1.0.0",
-				role: 0,
-				author: "eugene",
-				shortDescription: "imgur upload",
-				countDown: 0,
-				category: "imgur",
-				guide: {
-						en: '[reply to image]'
-				}
-		},
+  config: {
+    name: "imgur",
+    version: "1.0",
+    author: "otinxsandip",
+    countDown: 5,
+    role: 0,
+    longDescription: "Imgur link",
+    category: "image",
+    guide: {
+      en: "${pn} reply to image"
+    }
+  },
 
-		onStart: async ({ api, event }) => {
-				let link2;
+  onStart: async function ({ message, api, event }) {
 
-				if (event.type === "message_reply" && event.messageReply.attachments.length > 0) {
-						link2 = event.messageReply.attachments[0].url;
-				} else if (event.attachments.length > 0) {
-						link2 = event.attachments[0].url;
-				} else {
-						return api.sendMessage('No attachment detected. Please reply to an image.', event.threadID, event.messageID);
-				}
+    const puti = event.messageReply?.attachments[0]?.url;
 
-				try {
-						const res = await axios.get(`http://fi3.bot-hosting.net:20284/imgur?link=${encodeURIComponent(link2)}`);
-						const link = res.data.uploaded.image;
-						return api.sendMessage(`Here is the Imgur link for the image you provided:\n\n${link}`, event.threadID, event.messageID);
-				} catch (error) {
-						console.error("Error uploading image to Imgur:", error);
-						return api.sendMessage("An error occurred while uploading the image to Imgur.", event.threadID, event.messageID);
-				}
-		}
+    if (!puti) {
+      return message.reply('Please reply to an image.');
+    }
+
+    try {
+      const res = await axios.get(`https://sandipapi.onrender.com/imgur?link=${encodeURIComponent(puti)}`);
+      const lado = res.data.uploaded.image;
+      return message.reply(lado);
+    } catch (error) {
+      console.error(error);
+      return message.reply('API sude se😐 bro.');
+    }
+  }
 };
