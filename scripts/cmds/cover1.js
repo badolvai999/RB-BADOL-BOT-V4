@@ -1,70 +1,55 @@
 const axios = require('axios');
-const jimp = require("jimp");
-const fs = require("fs");
-module.exports = {
-	config: {
-		name: "cover1",
-		version: "1.0",
-		author: "munem",
-		countDown: 5,
-		role: 0,
-		shortDescription: "Create fb Banner",
-		longDescription: "",
-		category: "image",
-		guide: {
-			en: "{p}{n} Character name or code | Your Name | Your Facebook Name",
-		}
-	},
+const fs = require('fs-extra');
+const jimp = require('jimp');
+module.exports.config = {
+name: "fbcover",
+  version: "6.9",
+  role: 0,
+  author: "Dipto",
+  description: "Facebook cover",
+  category: "Cover", 
+  guide:{en: "name - title - address - email - phone - color (default = white)"},
+  coolDowns: 5
+};
+module.exports.onStart = async function({ api, event, args, usersData}) { 
+const dipto = args.join(" "); 
+  let id;
+  if (event.type === 'message_reply') {
+      id = event.messageReply.senderID;
+  } else {
+      id = Object.keys(event.mentions)[0] ||  event.senderID;
+  }
+  const data = await usersData.get(id);
+  const nam = data.name;
+if (!dipto) { 
+  return api.sendMessage(`❌| wrong \ntry ${global.GoatBot.config.prefix}fbcover v1/v2/v3 - name - title - address - email - phone - color (default = white)(total 7)`, event.threadID,event.messageID); 
+} 
+else { 
+  const msg = dipto.split("-"); 
+  const v = msg[0].trim() || "v1";
+  const name = msg[1].trim() || " "; 
+  const subname = msg[2].trim() || " "; 
+  const address = msg[3].trim() || " "; 
+  const email = msg[4].trim() || " "; 
+  const phone = msg[5].trim() || " "; 
+  const color = msg[6].trim() || "white" ;
+api.sendMessage(`Processing your Fbcover,Wait baby < 😘`, event.threadID,
+  (err, info) => 
+  setTimeout(() => { api.unsendMessage(info.messageID) 
+        }, 4000));
+  const img = `${global.GoatBot.config.api}/cover/${v}?name=${encodeURIComponent(name)}&subname=${encodeURIComponent(subname)}&number=${encodeURIComponent(phone)}&address=${encodeURIComponent(address)}&email=${encodeURIComponent(email)}&colour=${encodeURIComponent(color)}&uid=${id}`; 
 
-
-
-	onStart: async function ({ message, args, event, api }) {
-
-		const info = args.join(" ");
-		if (!info){
-			return message.reply(`Please enter in the format:\n/avatar  Name or code | text | Text`);
-
-			}else {
-			const msg = info.split("|");
-			const id = msg[0];
-		const name = msg[1];
-		const juswa = msg[2];
-			 const bgtext = msg[3];
-
-
-
-			 if (isNaN(id)) { // If input is not a number
-					await message.reply("processing your cover senpai....😻");
-
-				 let id1;
-		try {
-				id1 = (await axios.get(`https://www.nguyenmanh.name.vn/api/searchAvt?key=${id}`)).data.result.ID; 
-		} catch (error) {
-			await message.reply("Character not found, please check the name and try again...😿");
-			return;
-		}
-
-				const img = (`https://www.nguyenmanh.name.vn/api/avtWibu2?id=${id1}&tenchinh=${name}&fb=${juswa}&tenphu=${bgtext}&apikey=zrAM6vv6`)			
-								 const form = {
-				body: `「 Here's cover senpai😻❤️ 」`
-			};
-				form.attachment = []
-				form.attachment[0] = await global.utils.getStreamFromURL(img);
-			message.reply(form); 
-
-
-
-			 }else  { 
-			 await message.reply("processing your cover senpai....😻");
-
-				 const img = (`https://www.nguyenmanh.name.vn/api/avtWibu2?id=${id}&tenchinh=${name}&fb=${juswa}&tenphu=${bgtext}&apikey=zrAM6vv6`)			
-								 const form = {
-				body: `「 Here's cover senpai😻❤️ 」`
-			};
-				form.attachment = []
-				form.attachment[0] = await global.utils.getStreamFromURL(img);
-			message.reply(form); 
-				}
-			}
-		}
-	 };
+  try { 
+const response = await axios.get(img, { responseType: 'arraybuffer' }); 
+const image = await jimp.read(response.data); 
+const Path = `./dipto_${id}.png`; 
+  await image.writeAsync(Path); 
+const attachment = fs.createReadStream(Path);
+       api.sendMessage({ body: `✿━━━━━━━━━━━━━━━━━━━━━━━━━━━✿\n🔵𝗙𝗜𝗥𝗦𝗧 𝗡𝗔𝗠𝗘: ${name}\n⚫𝗦𝗘𝗖𝗢𝗡𝗗 𝗡𝗔𝗠𝗘:${subname}\n⚪𝗔𝗗𝗗𝗥𝗘𝗦𝗦: ${address}\n📫𝗠𝗔𝗜𝗟: ${email}\n☎️𝗣𝗛𝗢𝗡𝗘 𝗡𝗢.: ${phone}\n☢️𝗖𝗢𝗟𝗢𝗥: ${color}\n💁𝗨𝗦𝗘𝗥 𝗡𝗔𝗠𝗘: ${nam}\n✅𝗩𝗲𝗿𝘀𝗶𝗼𝗻 : ${v}\n✿━━━━━━━━━━━━━━━━━━━━━━━━━━━✿`,attachment
+}, event.threadID, () => fs.unlinkSync(Path), event.messageID); 
+      } catch (error) { 
+    console.error(error); 
+    api.sendMessage("An error occurred while generating the FB cover.", event.threadID); 
+  }
+}
+}
