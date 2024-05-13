@@ -7,7 +7,7 @@ const doNotDelete = "『𝐑𝐁-𝐁𝐀𝐃𝐎𝐋-𝐊𝐇𝐀𝐍』"; // d
 
 module.exports = {
   config: {
-    name: "help",
+    name: "help2",
     version: "1.17",
     author: "𝐑𝐁-𝐁𝐀𝐃𝐎𝐋-𝐊𝐇𝐀𝐍", // original author 𝐁𝐀𝐃𝐎𝐋
     countDown: 0,
